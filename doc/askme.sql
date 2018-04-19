@@ -10,10 +10,26 @@ Target Server Type    : MYSQL
 Target Server Version : 50718
 File Encoding         : 65001
 
-Date: 2018-04-18 15:25:31
+Date: 2018-04-19 16:33:51
 */
 
 SET FOREIGN_KEY_CHECKS=0;
+
+-- ----------------------------
+-- Table structure for answer
+-- ----------------------------
+DROP TABLE IF EXISTS `answer`;
+CREATE TABLE `answer` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `question_id` int(11) DEFAULT NULL,
+  `user_id` int(11) DEFAULT NULL,
+  `answer` varchar(2000) DEFAULT NULL COMMENT '回答内容',
+  `like` int(11) DEFAULT NULL COMMENT '点赞数',
+  `is_accept` bit(1) DEFAULT NULL COMMENT '是否采纳',
+  `create_time` datetime DEFAULT NULL,
+  `update_time` timestamp NULL DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=23 DEFAULT CHARSET=utf8mb4;
 
 -- ----------------------------
 -- Table structure for question
@@ -30,7 +46,7 @@ CREATE TABLE `question` (
   `create_time` datetime DEFAULT NULL,
   `update_time` timestamp NULL DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB AUTO_INCREMENT=7 DEFAULT CHARSET=utf8mb4;
 
 -- ----------------------------
 -- Table structure for user_info
@@ -65,4 +81,4 @@ CREATE TABLE `user_info` (
   `update_time` timestamp NULL DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP COMMENT '修改时间',
   `last_login_time` datetime DEFAULT NULL COMMENT '最近登录时间',
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8mb4;

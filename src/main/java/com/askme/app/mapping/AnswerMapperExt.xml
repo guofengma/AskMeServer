@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.askme.app.mapper.AnswerMapper">
+	<select id="selectByQuestionId" parameterType="Integer" resultType="map">
+		select t.*,t2.nick_name from answer t
+		join user_info t2 on t.user_id = t2.id
+		where question_id = #{questionId}
+	</select>
+</mapper>

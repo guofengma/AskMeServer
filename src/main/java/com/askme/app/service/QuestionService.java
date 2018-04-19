@@ -1,5 +1,7 @@
 package com.askme.app.service;
 
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -23,4 +25,8 @@ public class QuestionService {
 	public int updateByPrimaryKeySelective(Question record){
     	return questionMapper.updateByPrimaryKeySelective(record);
     }
+	
+	public List<Question> selectAll(){
+		return questionMapper.selectAll();
+	}
 }

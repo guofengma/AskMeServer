@@ -8,8 +8,10 @@ import com.askme.app.common.util.JwtUtils;
 import com.askme.app.common.util.MD5Generate;
 import com.askme.app.common.util.StringHelp;
 import com.askme.app.common.util.WeixinHelper;
+import com.askme.app.model.Answer;
 import com.askme.app.model.Question;
 import com.askme.app.model.UserInfo;
+import com.askme.app.service.AnswerService;
 import com.askme.app.service.QuestionService;
 import com.askme.app.service.UserService;
 
@@ -39,8 +41,9 @@ public class UserController {
     
     @Autowired
     QuestionService questionService;
-
-
+    
+    @Autowired
+    AnswerService answerService;
    
 
     /**
@@ -158,7 +161,7 @@ public class UserController {
      * @return
      */
     @RequestMapping("/getOpenidAndSession")
-    public ApiResult getOpenidAndSession(String code){
+    public ApiResult getOpenidAndSession(String code,String nickName){
     	ApiResult apiResult = new ApiResult();
     	//获取Openid和Session_key
 		String getUrl = "https://api.weixin.qq.com/sns/jscode2session?appid=" + WeixinHelper.APP_ID + "&secret=" + WeixinHelper.CORPSECRET + "&js_code=" + code + "&grant_type=authorization_code";
@@ -167,8 +170,6 @@ public class UserController {
 		JSONObject jsonObject = JSONObject.parseObject(returnContent);
 		String openid = jsonObject.getString("openid");
 		String sessionKey = jsonObject.getString("session_key");
-		logger.info("openid = " + openid);
-		logger.info("session_key = " + sessionKey);
 		
 		//判断openid是否已经存在
 		Map<String,String> param = new HashMap<String,String>();
@@ -177,6 +178,7 @@ public class UserController {
         if(userInfo == null){
         	userInfo = new UserInfo();
         	userInfo.setOpenid(openid);
+        	userInfo.setNickName(nickName);
         	userInfo.setSessionKey(sessionKey);
         	userInfo.setCreateTime(new Date());
         	userService.insertSelective(userInfo);
@@ -187,5 +189,55 @@ public class UserController {
         
         jsonObject.put("userId", userInfo.getId());
         return apiResult.success(jsonObject);
+    }
+    
+    /**
+     * 获取问题列表
+     * @return
+     */
+    @RequestMapping("/getQuestionList")
+    public ApiResult getQuestionList(){
+    	ApiResult apiResult = new ApiResult();
+    	
+    	List<Question> questionList = questionService.selectAll();
+    	return apiResult.success(questionList);
+    }
+    
+    /**
+     * 获取问题详情
+     * @param id
+     * @return
+     */
+    @RequestMapping("/getQuestionDetail")
+    public ApiResult getQuestionDetail(Integer id){
+    	ApiResult apiResult = new ApiResult();
+    	JSONObject jsonObject = new JSONObject();
+    	Question question = questionService.selectByPrimaryKey(id);
+    	List<Map<String, Object>> answerList = answerService.selectByQuestionId(id);
+    	
+    	jsonObject.put("question", question);
+    	jsonObject.put("answerList", answerList);
+    	return apiResult.success(jsonObject);
+    }
+    
+    
+    
+    /**
+     * 新增答案
+     * @param content
+     * @param userId
+     * @return
+     */
+    @RequestMapping("/addNewAnswer")
+    public ApiResult addNewAnswer(Integer questionId,String content,Integer userId){
+    	ApiResult apiResult = new ApiResult();
+    	Answer answer = new Answer();
+    	answer.setQuestionId(questionId);
+    	answer.setAnswer(content);
+    	answer.setUserId(userId);
+    	answer.setCreateTime(new Date());
+    	
+    	int count = answerService.insertSelective(answer);
+    	return apiResult.success(count);
     }
 }

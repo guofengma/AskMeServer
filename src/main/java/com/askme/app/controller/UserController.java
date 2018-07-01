@@ -3,11 +3,7 @@ package com.askme.app.controller;
 import com.alibaba.fastjson.JSONObject;
 import com.askme.app.common.ApiResult;
 import com.askme.app.common.CodeStatus;
-import com.askme.app.common.util.HttpService;
-import com.askme.app.common.util.JwtUtils;
-import com.askme.app.common.util.MD5Generate;
-import com.askme.app.common.util.StringHelp;
-import com.askme.app.common.util.WeixinHelper;
+import com.askme.app.common.util.*;
 import com.askme.app.model.Answer;
 import com.askme.app.model.Question;
 import com.askme.app.model.UserInfo;
@@ -189,6 +185,44 @@ public class UserController {
         
         jsonObject.put("userId", userInfo.getId());
         return apiResult.success(jsonObject);
+    }
+
+
+    /**
+     * 获取unionId
+     * @param encryptedData
+     * @param iv
+     * @param code
+     * @return
+     */
+    @RequestMapping("/getUnionId")
+    public ApiResult getUnionId(String encryptedData, String iv, String code){
+        ApiResult apiResult = new ApiResult();
+
+        //获取Openid和Session_key
+        String getUrl = "https://api.weixin.qq.com/sns/jscode2session?appid=" + WeixinHelper.APP_ID + "&secret=" + WeixinHelper.CORPSECRET + "&js_code=" + code + "&grant_type=authorization_code";
+        String returnContent = HttpService.post(getUrl);
+        logger.info("returnContent = " + returnContent);
+        JSONObject jsonObject = JSONObject.parseObject(returnContent);
+        String openid = jsonObject.getString("openid");
+        String sessionKey = jsonObject.getString("session_key");
+        String uionId = jsonObject.getString("unionId");
+
+        if(uionId == null){
+            //对encryptedData加密数据进行AES解密
+            try {
+                String result = AesCbcUtil.decrypt(encryptedData, sessionKey, iv, "UTF-8");
+                System.out.println("result = " + result);
+                if (null != result && result.length() > 0) {
+                    jsonObject = JSONObject.parseObject(result);
+                    uionId =  jsonObject.getString("unionId");
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+
+        return apiResult.success(uionId);
     }
     
     /**
